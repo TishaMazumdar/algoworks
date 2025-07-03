@@ -1,0 +1,9 @@
+__pycache__/
+.env
+.vscode/
+embeddings/
+*.pyc
+*.pkl
+*.db
+.ipynb_checkpoints/
+*.log
