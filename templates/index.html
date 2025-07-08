@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Algoworks RAG Assistant</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: auto; padding-top: 40px; }
+        textarea { width: 100%; height: 120px; padding: 10px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+        .response { margin-top: 20px; background: #f4f4f4; padding: 15px; border-radius: 5px; }
+        .sources { font-size: 0.9em; color: #666; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Ask a question</h2>
+    <form action="/ask-ui" method="post">
+        <textarea name="question" required></textarea><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if answer %}
+        <div class="response">
+            <strong>Answer:</strong>
+            <p>{{ answer }}</p>
+            <div class="sources">
+                <strong>Sources:</strong>
+                <ul>
+                {% for source in sources %}
+                    <li>{{ source }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+</body>
+</html>
