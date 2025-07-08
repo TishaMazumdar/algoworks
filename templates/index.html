@@ -16,11 +16,11 @@
 
         /* Sidebar */
         .sidebar {
-            width: 240px;
+            width: 250px;
             background-color: #1e1e1e;
             padding: 20px;
-            box-sizing: border-box;
-            border-right: 1px solid #333;
+            border-right: 1px solid #2e2e2e;
+            overflow-y: auto;
         }
 
         .sidebar h1 {
@@ -29,14 +29,24 @@
             color: #00c26e;
         }
 
-        .history-item {
-            background: #2a2a2a;
-            padding: 10px;
+        .sidebar h2 {
+            color: #ffffff;
+            font-size: 18px;
             margin-bottom: 10px;
-            border-radius: 8px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 12px;
+            padding: 8px;
+            background-color: #2a2a2a;
+            border-radius: 6px;
             font-size: 14px;
-            color: #ccc;
-            cursor: pointer;
+            word-wrap: break-word;
         }
 
         /* Main content */
@@ -44,6 +54,11 @@
             flex: 1;
             padding: 40px;
             overflow-y: auto;
+        }
+
+        h1 {
+            color: #fff;
+            margin-top: 0;
         }
 
         h2 {
@@ -132,12 +147,24 @@
     </style>
 </head>
 <body>
+    <!-- Sidebar for History -->
     <div class="sidebar">
-        <h1>AlgoAnswers</h1>
-        <div class="history-item">Query history will appear here</div>
-        <div class="history-item">Coming soon...</div>
+        <h2>History</h2>
+        <ul>
+            {% for chat in history %}
+            <li>
+                <form method="post" action="/ask-ui">
+                    <input type="hidden" name="question" value="{{ chat.question }}">
+                    <button type="submit" style="all: unset; cursor: pointer; color: #90caf9;">
+                        {{ chat.question }}
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 
+    <!-- Main Content -->
     <div class="main">
         <h2>Ask a question</h2>
         <form id="queryForm" action="/ask-ui" method="post">

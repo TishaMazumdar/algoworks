@@ -12,7 +12,7 @@ templates = Jinja2Templates(directory="templates")
 retriever = get_vectorstore_retriever()
 qa_chain = create_qa_chain(retriever)
 
-chat_history: list[ChatEntry] = []      # for now, later can change to json
+chat_history = []      # for now, later can change to json
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
@@ -32,11 +32,15 @@ def ask_ui(request: Request, question: str = Form(...)):
     })
 
     # Chat history
-    chat_history.insert(0, ChatEntry(question, formatted_answer, sources))
+    chat_history.append({
+        "question": question,
+        "answer": formatted_answer,
+        "sources": sources
+    })
 
     return templates.TemplateResponse("index.html", {
         "request": request,
         "answer": formatted_answer,
         "sources": sources,
-        "history": chat_history[:5]
+        "history": chat_history[-5:]
     })
