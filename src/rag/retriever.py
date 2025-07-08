@@ -1,7 +1,6 @@
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_core.vectorstores import VectorStoreRetriever
 from src.rag.vector_store import load_vectorstore
-
 
 def get_retriever(
     vectorstore: Chroma,
