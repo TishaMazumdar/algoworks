@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from src.rag.qa_engine import create_qa_chain, query_rag
 from src.rag.retriever import get_vectorstore_retriever
+import markdown
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -17,6 +18,11 @@ def home(request: Request):
 @app.post("/ask-ui", response_class=HTMLResponse)
 def ask_ui(request: Request, question: str = Form(...)):
     result = query_rag(qa_chain, question)
+
+    # Convert answer text (markdown-like) into HTML
+    raw_answer = result["result"]
+    formatted_answer = markdown.markdown(raw_answer)
+
     sources = list({
         doc.metadata.get("source", "unknown")
         for doc in result["source_documents"]
@@ -24,6 +30,6 @@ def ask_ui(request: Request, question: str = Form(...)):
 
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "answer": result["result"],
+        "answer": formatted_answer,
         "sources": sources
     })

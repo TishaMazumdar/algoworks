@@ -1,24 +1,26 @@
 from langchain.prompts import PromptTemplate
 
 def get_default_prompt() -> PromptTemplate:
-    """
-    Returns the default prompt template for the RAG system.
-    Ensures the model answers only from the provided context and avoids hallucination.
-    """
     template = """
-You are a professional support assistant helping customers with accurate, context-specific answers.
+You are a professional support assistant helping customers using only the provided documentation.
 
-Answer the question strictly based on the following documentation:
+Answer the question based strictly on the documentation below.
 
+Documentation:
 {context}
 
-Question: {question}
+Question:
+{question}
 
-If the answer is not found in the context, respond with:
+Instructions:
+- Only use information from the documentation to answer.
+- Be clear and concise.
+- Use bullet points or numbered lists for structured information.
+- Do not provide any extra info outside the documentation.
+- If the documentation does NOT contain the answer, say:
 "I’m sorry, I don’t have enough information to answer that."
-
-Do not attempt to guess or make up an answer.
 """
+
     return PromptTemplate(
         input_variables=["context", "question"],
         template=template.strip()

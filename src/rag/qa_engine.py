@@ -11,7 +11,11 @@ def create_qa_chain(
     """
     Creates a RetrievalQA chain with a custom prompt and retriever.
     """
-    llm = OllamaLLM(model=model_name)
+    llm = OllamaLLM(
+        model="llama3",
+        system_message="You are a helpful support assistant. Only use the provided context. Do not hallucinate."
+    )
+
 
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
