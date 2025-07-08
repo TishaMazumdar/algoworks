@@ -1,5 +1,6 @@
 from langchain_community.vectorstores import Chroma
 from langchain_core.vectorstores import VectorStoreRetriever
+from src.rag.vector_store import load_vectorstore
 
 
 def get_retriever(
@@ -19,3 +20,10 @@ def get_retriever(
         }
     )
     return retriever
+
+def get_vectorstore_retriever() -> VectorStoreRetriever:
+    """
+    Loads persisted vectorstore and returns retriever.
+    """
+    vectorstore = load_vectorstore()
+    return get_retriever(vectorstore)
