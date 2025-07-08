@@ -44,3 +44,13 @@ def ask_ui(request: Request, question: str = Form(...)):
         "sources": sources,
         "history": chat_history[-5:]
     })
+
+@app.post("/clear-history")
+def clear_history(request: Request):
+    chat_history.clear()
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "history": [],
+        "answer": None,
+        "sources": []
+    })
