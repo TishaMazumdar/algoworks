@@ -1,10 +1,21 @@
+# FastAPI backend
+fastapi
+uvicorn
+python-dotenv
+
+# Langchain core + integrations
 langchain
 langchain-community
 langchain-core
 langchain-ollama
+
+# Vector store and LLM
 chromadb
-tqdm
 ollama
-uvicorn
-fastapi
-python-dotenv
+
+# File loading and utilities
+tqdm
+pypdf
+unstructured
+python-docx
+openpyxl
