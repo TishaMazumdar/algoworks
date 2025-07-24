@@ -1,5 +1,5 @@
 from src.loaders.file_loader import load_all_documents
-from src.rag.vector_store import build_vectorstore, load_vectorstore
+from src.rag.vector_store import build_vectorstore
 from src.rag.retriever import get_retriever
 from src.rag.qa_engine import create_qa_chain, query_rag
 

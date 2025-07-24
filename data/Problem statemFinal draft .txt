@@ -1,0 +1,126 @@
+﻿SHEBUILDS HACKATHON
+
+
+Problem Statement 1: AI-Powered Personalized Roommate Matching for Women’s Co-Living Spaces 
+Objective: 
+Design and develop an AI-driven roommate matching system that intelligently recommends the most compatible roommates for twin-sharing accommodations. The system should rely on minimal survey input while ensuring high accuracy in match quality. Additionally, participants must consider incorporating Omnidim.io’s Voice AI Assistant to capture user preferences in a natural, conversational manner. 
+ Shape 
+ 
+Key Requirements: 
+1. Minimal Input, Maximum Insight: 
+* Design a micro-survey with 5 or fewer questions that can capture essential compatibility attributes (e.g., lifestyle, sleeping habits, work hours, cleanliness, social behaviour).  
+2. AI-Based Matching Algorithm: 
+* Build a model or matching logic that processes inputs and returns: 
+* The best roommate matches are available in the system. 
+* A match score or explanation for transparency and user trust. 
+3. Omnidim Voice AI Integration: 
+* Integrate Omnidim.io’s Voice Assistant to: 
+* Deliver the survey conversationally. 
+* Personalize questions based on prior answers or tone. 
+* Store structured input for backend processing. 
+4. Room Allocation Logic: 
+* Beyond matching people, suggest the most suitable room assignment based on availability (e.g., twin vs single), preferences (e.g., near window, floor level), and match outcome. 
+5. Scalability & Ethics: 
+* Design with scalability in mind—consider how this would function with hundreds or thousands of users. 
+* Respect privacy and fairness—no biases based on race, religion, etc. 
+ 
+ 
+Deliverables 
+1. Voice-Based Micro-Survey (Omnidim.io Integration) 
+* A working demo of a voice-first intake form using Omnidim.io that asks 5 or fewer well-crafted questions. 
+* Questions must extract key compatibility traits (e.g., cleanliness level, sleeping habits, introversion/extroversion, etc.). 
+* Responses should be structured and usable as matching inputs. 
+2. Guest Profile Builder (optional) 
+* Convert the survey responses into a structured guest profile object (JSON or DB record). 
+* Include: 
+* Name / ID (mock data acceptable). 
+* Compatibility traits (from survey). 
+* Room preferences (e.g., twin or single, quiet floor, etc.). 
+3. Matching Algorithm 
+* Build an algorithm that: 
+* Compares incoming guest profiles with existing occupants looking for a roommate. 
+* Outputs the top roommate match with a compatibility score. 
+* Suggests an available twin-sharing room where both can stay. 
+* Matching logic should account for: 
+* Direct compatibility of traits. 
+* Room preference compatibility (e.g., both prefer night owls). 
+* Graceful handling when no good match is found. 
+4. Match Recommendation Output 
+* Display the match result: 
+* Suggested roommate name/profile. 
+* Compatibility score (0–100 or High/Medium/Low). 
+* Suggested room (mock room ID with attributes like floor, side, etc.). 
+* Include a simple explanation of why the match was chosen (e.g., "Both prefer quiet evenings and share similar routines"). 
+5. Basic Admin View or Log 
+* Maintain a simple list of all: 
+* Incoming profiles. 
+* Matching results. 
+* Room assignments. 
+* This could be a basic UI, a console printout, or a spreadsheet-style log. 
+________________
+
+
+
+
+Problem Statement 2: Voice-Driven Virtual Customer Success Manager for Resident Support and Engagement. 
+Objective: 
+Build a voice-enabled Virtual Community Manager that serves two primary functions: 
+1. Support Management: Allow residents to raise complaints or service requests and track their resolution using natural speech. 
+2. Community Engagement Assistant: Recommend potential events to the community manager, assist in promoting selected events, and gather feedback and analytics post-event. 
+ 
+Key Features & Functional Scope 
+1. Voice-Based Complaint Handling 
+* Voice Input via Omnidim.io: 
+* Residents log complaints through the Voice AI Assistant. 
+* Input should include details like issue type, location (room/floor), and a brief description. 
+* Automated Ticket Creation: 
+* System converts voice input into structured ticket format. 
+* Assigns predefined priority levels (P1–P4) based on keywords and issue types (e.g., water leakage = P1, light flickering = P3). 
+* Allocates ticket to an available technician or staff based on specialization and availability. 
+* Ticket Tracking: 
+* When a resident later provides the ticket number, the assistant responds with the current status (e.g., Assigned, In Progress, Resolved). 
+* Allows status checks using voice commands like “What’s the update on ticket 2035?” 
+ 
+2. AI-Driven Community Engagement Support 
+* Event Suggestions to Community Managers: 
+* The system suggests event ideas to the admin based on: 
+* Past successful events. 
+* Facilities available at the property (e.g., terrace, lounge, garden). 
+* Calendar context (e.g., weekends, festivals). 
+
+
+* Event Promotion Assistance: 
+* Helps create and broadcast event announcement messages (text or voice-based) for community platforms like WhatsApp, bulletin boards, internal apps. 
+* Example: “This Friday, don’t miss the Bollywood Karaoke Night on the rooftop!” 
+* Feedback Collection & Analytics: 
+* Post-event, the assistant collects resident feedback via voice, short surveys, or ratings. 
+* Generates basic analytics such as: 
+* Attendance count (input from admin). 
+* Positive/negative feedback trends. 
+* Engagement score for each event. 
+* Provides insights to help admins plan future events better. 
+ 
+Deliverables: 
+1. Working Voice Interface (Using Omnidim.io): 
+1. Residents can log complaints via voice. 
+2. Provide ticket number via voice and get status updates. 
+2. Complaint Management Backend: 
+1. Ticket generation based on voice input. 
+2. Priority tagging (P1–P4) based on predefined keyword mapping. 
+3. Technician/staff assignment (mocked or basic logic is acceptable). 
+3. Event Recommendation Module: 
+1. Suggest events dynamically based on: 
+1. Internal calendar. 
+2. Available infrastructure (you may mock this input). 
+3. Past events stored in a mock dataset. 
+4. Promotion Assistance: 
+1. Generate sample text announcements and/or voice-friendly promotion scripts for at least 2 recommended events. 
+5. Feedback & Analytics Dashboard: 
+1. Collect and store feedback (ratings, voice responses, text). 
+2. Display basic analytics: 
+1. Participation estimates (mock input acceptable). 
+2. Feedback distribution. 
+3. Event popularity ranking. 
+
+
+—----------------------------------------------------END—---------------------------------------------------------------
