@@ -1,6 +1,6 @@
 import os
 from typing import List
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader, UnstructuredExcelLoader
 from langchain.docstore.document import Document
 
 def load_pdf(path: str) -> List[Document]:
@@ -24,6 +24,13 @@ def load_txt(path: str) -> List[Document]:
         doc.metadata["source"] = path
     return docs
 
+def load_xlsx(path: str) -> List[Document]:
+    loader = UnstructuredExcelLoader(path)
+    docs = loader.load()
+    for doc in docs:
+        doc.metadata["source"] = path
+    return docs
+
 def load_all_documents(directory_path: str) -> List[Document]:
     all_docs = []
     for file in os.listdir(directory_path):
@@ -34,6 +41,8 @@ def load_all_documents(directory_path: str) -> List[Document]:
             docs = load_docx(file_path)
         elif file.lower().endswith(".txt"):
             docs = load_txt(file_path)
+        elif file.lower().endswith(".xlsx"):
+            docs = load_xlsx(file_path)
         else:
             continue
         all_docs.extend(docs)
