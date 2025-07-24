@@ -24,16 +24,19 @@ A FastAPI-based Question-Answering app that lets users upload `.pdf`, `.docx`, `
 │   └── api.py                 # FastAPI routes
 ├── src/
 │   ├── loaders/
-│   │   └── file\_loader.py     # Handles .pdf, .docx, .txt, .xlsx loading
+│   │   └── file_loader.py     # Handles .pdf, .docx, .txt, .xlsx loading
 │   ├── rag/
 │   │   ├── retriever.py       # Embedding & similarity search
-│   │   ├── qa\_engine.py       # Core Q\&A logic
-│   │   └── vector\_store.py    # ChromaDB vector store
+│   │   ├── qa_engine.py       # Core Q&A logic
+│   │   └── vector_store.py    # ChromaDB vector store
+│   ├── models/
+│   │   ├── cache.json         # Stores the most recent searches
+│   │   └── history.py         # Handles history storage logic
 │   └── utils/
 │       └── prompts.py         # Custom LangChain prompt template
 ├── data/                      # Place your documents here
 ├── test/
-│   └── test\_queries.py        # Optional test cases
+│   └── test_queries.py        # Optional test cases
 ├── .env                       # Env variables (like model name)
 ├── requirements.txt
 └── main.py                    # Entrypoint
