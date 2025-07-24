@@ -8,8 +8,8 @@ from langchain_ollama import OllamaEmbeddings
 
 def split_documents(
     documents: List[Document],
-    chunk_size: int = 700,
-    chunk_overlap: int = 100
+    chunk_size: int = 1000,
+    chunk_overlap: int = 200
 ) -> List[Document]:
     """
     Splits the input documents into smaller chunks for embedding.
