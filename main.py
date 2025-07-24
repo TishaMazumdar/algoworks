@@ -1,4 +1,4 @@
-from src.loaders.pdf_loader import load_all_pdfs
+from src.loaders.file_loader import load_all_documents
 from src.rag.vector_store import build_vectorstore, load_vectorstore
 from src.rag.retriever import get_retriever
 from src.rag.qa_engine import create_qa_chain, query_rag
@@ -11,8 +11,8 @@ def main():
     model_name = "llama3"
 
     # === Load documents ===
-    print("Loading PDFs...")
-    docs = load_all_pdfs(data_dir)
+    print("Loading Documents...")
+    docs = load_all_documents(data_dir)
     print(f"Loaded {len(docs)} documents.\n")
 
     # === Build / Load Vectorstore ===

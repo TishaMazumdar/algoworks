@@ -17,8 +17,8 @@ Instructions:
 - Be clear and concise.
 - Use bullet points or numbered lists for structured information.
 - Do not provide any extra info outside the documentation.
-- If the documentation does NOT contain the answer, say:
-"I’m sorry, I don’t have enough information to answer that."
+- If the documentation does NOT contain the answer explicitly, say:
+"Based on the documentation provided, I couldn't find a direct answer. Please refer to the relevant section or try rephrasing."
 """
 
     return PromptTemplate(
