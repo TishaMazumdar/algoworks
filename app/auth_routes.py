@@ -45,7 +45,8 @@ async def login_user(request: Request, username: str = Form(...), password: str 
 @router.post("/logout")
 async def logout_user(request: Request):
     request.session.clear()
-    return JSONResponse(content={"message": "Logged out."})
+    request.session["toast"] = "You’ve been logged out successfully."
+    return RedirectResponse(url="/", status_code=302)
 
 # Get current logged-in user
 @router.get("/me")
