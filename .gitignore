@@ -8,3 +8,5 @@ embeddings/
 .ipynb_checkpoints/
 *.log
 models/
+user_uploads/
+chat_cache/
