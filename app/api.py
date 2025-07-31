@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -8,7 +8,9 @@ import markdown
 
 from src.rag.qa_engine import create_qa_chain, query_rag
 from src.rag.retriever import get_vectorstore_retriever
+from src.rag.vector_store import build_vectorstore
 from src.models.history import ChatEntry, load_cache, save_cache, clear_cache
+from src.loaders.file_loader import load_all_documents
 from app.auth_routes import router as auth_router
 
 # Load env vars
@@ -21,9 +23,7 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.include_router(auth_router)
 templates = Jinja2Templates(directory="templates")
 
-# RAG + history setup
-retriever = get_vectorstore_retriever()
-qa_chain = create_qa_chain(retriever)
+# History setup
 chat_history = load_cache()
 
 # 🧠 Check if a question is already cached
@@ -34,6 +34,16 @@ def get_cached_answer(question: str):
             return entry
     return None
 
+def get_user_folder(user_id: str):
+    upload_dir = os.path.join("user_uploads", user_id)
+    os.makedirs(upload_dir, exist_ok=True)
+    return upload_dir
+
+def get_embedding_folder(user_id: str):
+    embed_dir = os.path.join("embeddings", user_id)
+    os.makedirs(embed_dir, exist_ok=True)
+    return embed_dir
+
 # 🏠 Home route (requires login)
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -41,12 +51,17 @@ async def home(request: Request):
     if not user:
         return RedirectResponse(url="/login")
 
-    toast = request.session.pop("toast", None)  # ✅ Get & clear the toast
+    toast = request.session.pop("toast", None)
+
+    user_id = user["name"]
+    upload_dir = get_user_folder(user_id)
+    files = os.listdir(upload_dir) if os.path.exists(upload_dir) else []
 
     return templates.TemplateResponse("index.html", {
         "request": request,
         "user_name": user["name"],
-        "toast": toast  # ✅ Pass to template
+        "toast": toast,
+        "files": files  # ✅ Add this line
     })
 
 # 💬 Handle UI-based query asking
@@ -58,6 +73,8 @@ def ask_ui(request: Request, question: str = Form(...)):
         answer = cached.answer
         sources = cached.sources
     else:
+        # Fallback to global qa_chain if user hasn’t uploaded
+        qa_chain = getattr(request.app.state, "qa_chain", None) or globals().get("qa_chain")
         result = query_rag(qa_chain, question)
         raw_answer = result["result"]
         answer = markdown.markdown(raw_answer)
@@ -89,3 +106,36 @@ def clear_history(request: Request):
         "answer": None,
         "sources": []
     })
+
+@app.post("/upload")
+async def upload_file(request: Request, file: UploadFile = File(...)):
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    # Use username as unique user ID
+    user_id = user["name"]  # or user["name"] if you prefer username-based folder
+
+    # Store files in data/<user_id>/filename.pdf
+    upload_dir = get_user_folder(user_id)  # Make sure this returns "data/<user_id>"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    file_path = os.path.join(upload_dir, file.filename)
+
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    # Load all user documents from their folder
+    documents = load_all_documents(upload_dir)
+
+    # Create or update vectorstore for this user
+    embed_dir = get_embedding_folder(user_id)  # should return "embeddings/<user_id>"
+    os.makedirs(embed_dir, exist_ok=True)
+    build_vectorstore(documents, persist_directory=embed_dir)
+
+    # Set retriever + QA chain in app state for querying
+    retriever = get_vectorstore_retriever(persist_directory=embed_dir)
+    request.app.state.qa_chain = create_qa_chain(retriever)
+
+    request.session["toast"] = f"✅ Uploaded {file.filename} successfully."
+    return RedirectResponse("/", status_code=303)

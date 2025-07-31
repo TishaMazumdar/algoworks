@@ -191,6 +191,25 @@
             </li>
             {% endfor %}
         </ul>
+
+        <hr style="margin: 20px 0; border-color: #444;">
+
+        <h2>Upload a file</h2>
+        <form method="post" action="/upload" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".pdf,.txt,.docx" required
+                style="margin-bottom: 10px; color: white;"><br>
+            <button type="submit">Upload</button>
+        </form>
+
+        {% if files %}
+            <h2>Your Files</h2>
+            <ul style="list-style: none; padding-left: 0;">
+                {% for file in files %}
+                    <li style="color: white;">📄 {{ file }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
     </div>
 
     <!-- Main Content -->
