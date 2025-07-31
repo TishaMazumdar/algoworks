@@ -13,18 +13,17 @@ async def show_login_form(request: Request):
 
 # Handle signup
 @router.post("/signup", response_class=HTMLResponse)
-async def signup_post(request: Request, name: str = Form(...), email: str = Form(...), password: str = Form(...)):
-    result = signup(email, password)
+async def signup_post(request: Request, username: str = Form(...), password: str = Form(...)):
+    result = signup(username, password)
 
     if result == "Username already exists.":
-        return templates.TemplateResponse("signup.html", {
+        return templates.TemplateResponse("auth.html", {
             "request": request,
-            "error": "Email already registered"
+            "error": "name already registered"
         })
 
-    # Set session and redirect to home with toast
-    request.session["user"] = {"email": email, "name": name}
-    request.session["toast"] = "Signup successful. Welcome, " + name + "!"
+    request.session["user"] = {"name": username}
+    request.session["toast"] = "Signup successful. Welcome, " + username + "!"
     return RedirectResponse(url="/", status_code=302)
 
 # Handle login and store in session
