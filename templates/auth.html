@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login / Signup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .auth-container {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            width: 360px;
+        }
+
+        .auth-container h1 {
+            text-align: center;
+            color: #00c26e;
+            margin-bottom: 30px;
+            font-size: 26px;
+        }
+
+        .auth-container form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-container input {
+            margin-bottom: 15px;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: #f0f0f0;
+        }
+
+        .auth-container button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #00c26e;
+            color: #000;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .auth-container button:hover {
+            background-color: #00a15a;
+        }
+
+        .toggle {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .toggle a {
+            color: #00c26e;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1 id="form-title">Login</h1>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="post" id="auth-form" action="/login">
+            <input type="hidden" name="mode" id="mode" value="login">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" id="auth-button">Login</button>
+        </form>
+        <div class="toggle">
+            <span id="toggle-text">Don't have an account? <a onclick="toggleMode()">Sign up</a></span>
+        </div>
+    </div>
+
+    <script>
+        function toggleMode() {
+            const title = document.getElementById("form-title");
+            const button = document.getElementById("auth-button");
+            const modeInput = document.getElementById("mode");
+            const toggleText = document.getElementById("toggle-text");
+            const form = document.getElementById("auth-form");
+
+            if (modeInput.value === "login") {
+                title.innerText = "Sign Up";
+                button.innerText = "Sign Up";
+                modeInput.value = "signup";
+                form.action = "/signup";  // 👈 switch endpoint
+                toggleText.innerHTML = `Already have an account? <a onclick="toggleMode()">Login</a>`;
+            } else {
+                title.innerText = "Login";
+                button.innerText = "Login";
+                modeInput.value = "login";
+                form.action = "/login";  // 👈 switch endpoint
+                toggleText.innerHTML = `Don't have an account? <a onclick="toggleMode()">Sign up</a>`;
+            }
+        }
+    </script>
+</body>
+</html>
