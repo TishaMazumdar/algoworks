@@ -7,3 +7,4 @@ embeddings/
 *.db
 .ipynb_checkpoints/
 *.log
+models/
