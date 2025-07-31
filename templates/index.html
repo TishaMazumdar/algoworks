@@ -14,6 +14,27 @@
             height: 100vh;
         }
 
+        /* Scrollbar Track */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        /* Scrollbar Thumb */
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 8px;
+        }
+
+        /* On hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        /* Scrollbar Track */
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
         /* Sidebar */
         .sidebar {
             width: 250px;
@@ -153,7 +174,7 @@
     </style>
 </head>
 <body>
-    <div style="position: absolute; top: 20px; right: 30px; display: flex; align-items: center; gap: 10px;">
+    <div style="position: fixed; top: 20px; right: 30px; display: flex; align-items: center; gap: 10px;">
         {% if user_name %}
             <span style="color: #00c26e; font-weight: bold; font-size: 18px; margin-top: 10px;">Hi, {{ user_name }}!</span>
             <form method="post" action="/logout">
@@ -174,7 +195,7 @@
                     {% if not history %}
                     disabled
                     {% endif %}
-                    style="margin-top: 10px; background-color: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">
+                    style="margin-top: 10px; margin-left: 10px; background-color: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">
                 Clear History
             </button>
         </form>
@@ -195,10 +216,21 @@
         <hr style="margin: 20px 0; border-color: #444;">
 
         <h2>Upload a file</h2>
-        <form method="post" action="/upload" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".pdf,.txt,.docx" required
-                style="margin-bottom: 10px; color: white;"><br>
-            <button type="submit">Upload</button>
+        <form method="post" action="/upload" enctype="multipart/form-data" id="uploadForm">
+            <label for="fileUpload" style="
+                background-color: #00c26e;
+                color: black;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                display: inline-block;
+                font-size: 14px;
+                margin-left: 10px;
+            ">
+                Choose File
+            </label>
+            <input id="fileUpload" type="file" name="file" accept=".pdf,.txt,.docx" required
+                style="display: none;" onchange="document.getElementById('uploadForm').submit();">
         </form>
 
         {% if files %}
@@ -214,6 +246,13 @@
 
     <!-- Main Content -->
     <div class="main">
+        
+        {% if toast %}
+        <div style="margin-bottom: 20px; padding: 12px; background-color: #003c2d; color: #00c26e; border-radius: 8px; font-weight: bold;">
+            {{ toast }}
+        </div>
+        {% endif %}
+
         <h2>Ask a question</h2>
         <form id="queryForm" action="/ask-ui" method="post">
             <textarea name="question" placeholder="Type your question here..." required>{{ question or "" }}</textarea><br>
@@ -245,6 +284,11 @@
         form.addEventListener('submit', () => {
             spinner.style.display = 'block';
         });
+
+        setTimeout(() => {
+            const toast = document.querySelector('[style*="background-color: #003c2d"]');
+            if (toast) toast.style.display = 'none';
+        }, 3000);
     </script>
 </body>
 </html>

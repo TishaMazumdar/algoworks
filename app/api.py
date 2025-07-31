@@ -9,7 +9,7 @@ import markdown
 from src.rag.qa_engine import create_qa_chain, query_rag
 from src.rag.retriever import get_vectorstore_retriever
 from src.rag.vector_store import build_vectorstore
-from src.models.history import ChatEntry, load_cache, save_cache, clear_cache
+from src.models.history import ChatEntry, load_user_cache, save_user_cache, clear_user_cache, get_user_cached_entry
 from src.loaders.file_loader import load_all_documents
 from app.auth_routes import router as auth_router
 
@@ -23,13 +23,11 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.include_router(auth_router)
 templates = Jinja2Templates(directory="templates")
 
-# History setup
-chat_history = load_cache()
-
 # 🧠 Check if a question is already cached
-def get_cached_answer(question: str):
+def get_cached_answer(user_id: str, question: str):
     question = question.strip().lower()
-    for entry in chat_history:
+    history = load_user_cache(user_id)
+    for entry in history:
         if entry.question.strip().lower() == question:
             return entry
     return None
@@ -47,27 +45,17 @@ def get_embedding_folder(user_id: str):
 # 🏠 Home route (requires login)
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse(url="/login")
-
-    toast = request.session.pop("toast", None)
-
-    user_id = user["name"]
-    upload_dir = get_user_folder(user_id)
-    files = os.listdir(upload_dir) if os.path.exists(upload_dir) else []
-
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "user_name": user["name"],
-        "toast": toast,
-        "files": files  # ✅ Add this line
-    })
+    return render_home(request)
 
 # 💬 Handle UI-based query asking
 @app.post("/ask-ui", response_class=HTMLResponse)
 def ask_ui(request: Request, question: str = Form(...)):
-    cached = get_cached_answer(question)
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    user_id = user["name"]
+    cached = get_cached_answer(user_id, question)
 
     if cached:
         answer = cached.answer
@@ -84,28 +72,23 @@ def ask_ui(request: Request, question: str = Form(...)):
         })
 
         new_entry = ChatEntry(question=question, answer=answer, sources=sources)
-        chat_history.append(new_entry)
-        chat_history[:] = chat_history[-6:]
-        save_cache(new_entry)
+        history = load_user_cache(user_id)
+        history.append(new_entry)
+        history[:] = history[-6:]
+        save_user_cache(user_id, new_entry)
 
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "answer": answer,
-        "sources": sources,
-        "history": [entry.to_dict() for entry in chat_history][-5:]
-    })
+    return render_home(request, answer=answer, sources=sources)
 
 # 🧹 Clear history
 @app.post("/clear-history", response_class=HTMLResponse)
 def clear_history(request: Request):
-    chat_history.clear()
-    clear_cache()
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "history": [],
-        "answer": None,
-        "sources": []
-    })
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    user_id = user["name"]
+    clear_user_cache(user_id)
+    return render_home(request)
 
 @app.post("/upload")
 async def upload_file(request: Request, file: UploadFile = File(...)):
@@ -114,10 +97,10 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
         return RedirectResponse("/login", status_code=302)
 
     # Use username as unique user ID
-    user_id = user["name"]  # or user["name"] if you prefer username-based folder
+    user_id = user["name"]  
 
-    # Store files in data/<user_id>/filename.pdf
-    upload_dir = get_user_folder(user_id)  # Make sure this returns "data/<user_id>"
+    # Store files in user_uploads/<user_id>/filename.pdf
+    upload_dir = get_user_folder(user_id)  
     os.makedirs(upload_dir, exist_ok=True)
 
     file_path = os.path.join(upload_dir, file.filename)
@@ -139,3 +122,25 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
 
     request.session["toast"] = f"✅ Uploaded {file.filename} successfully."
     return RedirectResponse("/", status_code=303)
+
+def render_home(request: Request, answer=None, sources=None):
+    user = request.session.get("user")
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+
+    user_id = user["name"]
+    upload_dir = get_user_folder(user_id)
+    files = os.listdir(upload_dir) if os.path.exists(upload_dir) else []
+
+    toast = request.session.pop("toast", None)
+    history = load_user_cache(user_id)
+
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "user_name": user_id,
+        "toast": toast,
+        "files": files,
+        "answer": answer,
+        "sources": sources,
+        "history": [entry.to_dict() for entry in history][-5:]
+    })

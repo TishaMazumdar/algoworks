@@ -1,12 +1,15 @@
 from datetime import datetime
 import json
 import os
+from typing import List
 
-CACHE_FILE = os.path.join("src", "models", "cache.json")
+CHAT_CACHE_DIR = ("chat_cache")
+os.makedirs(CHAT_CACHE_DIR, exist_ok=True)
+
 MAX_CACHE_SIZE = 6
 
 class ChatEntry:
-    def __init__(self, question: str, answer: str, sources: list[str], timestamp: str = None):
+    def __init__(self, question: str, answer: str, sources: List[str], timestamp: str = None):
         self.question = question
         self.answer = answer
         self.sources = sources
@@ -29,40 +32,48 @@ class ChatEntry:
             timestamp=data.get("timestamp")
         )
 
-# ---------- Caching Functions ----------
+# ---------- Per-User Caching Functions ----------
 
-def load_cache():
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "r") as f:
+def get_user_cache_file(username: str) -> str:
+    return os.path.join(CHAT_CACHE_DIR, f"{username}.json")
+
+
+def load_user_cache(username: str) -> List[ChatEntry]:
+    file_path = get_user_cache_file(username)
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
             try:
-                data = json.load(f)
+                content = f.read().strip()
+                if not content:
+                    return []
+                data = json.loads(content)
                 return [ChatEntry.from_dict(entry) for entry in data]
             except json.JSONDecodeError:
                 return []
     return []
 
-def get_all_cached_entries():
-    return [ChatEntry.from_dict(entry) for entry in load_cache()]
 
-def get_from_cache(question: str):
+def save_user_cache(username: str, entry: ChatEntry):
+    entries = load_user_cache(username)
+
+    # Avoid duplicates
+    if any(e.question.strip().lower() == entry.question.strip().lower() for e in entries):
+        return
+
+    entries.append(entry)
+    entries = entries[-MAX_CACHE_SIZE:]  # Keep only the last N entries
+
+    with open(get_user_cache_file(username), "w") as f:
+        json.dump([e.to_dict() for e in entries], f, indent=2)
+
+
+def get_user_cached_entry(username: str, question: str) -> ChatEntry | None:
     question_lower = question.strip().lower()
-    for entry in get_all_cached_entries():
+    for entry in load_user_cache(username):
         if entry.question.strip().lower() == question_lower:
             return entry
     return None
 
-def save_cache(entry: ChatEntry):
-    data = load_cache()  # Returns List[ChatEntry]
-
-    # Avoid duplicates
-    if any(e.question.strip().lower() == entry.question.strip().lower() for e in data):
-        return
-
-    data.append(entry)
-
-    with open(CACHE_FILE, "w") as f:
-        json.dump([e.to_dict() for e in data], f, indent=2)
-
-def clear_cache():
-    with open(CACHE_FILE, "w") as f:
-        json.dump([], f)
+def clear_user_cache(username: str):
+    with open(get_user_cache_file(username), "w") as f:
+        f.write("[]")

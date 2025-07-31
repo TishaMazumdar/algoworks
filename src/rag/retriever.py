@@ -20,9 +20,9 @@ def get_retriever(
     )
     return retriever
 
-def get_vectorstore_retriever() -> VectorStoreRetriever:
+def get_vectorstore_retriever(persist_directory: str) -> VectorStoreRetriever:
     """
-    Loads persisted vectorstore and returns retriever.
+    Loads user-specific vectorstore and returns retriever.
     """
-    vectorstore = load_vectorstore()
+    vectorstore = load_vectorstore(persist_directory=persist_directory)
     return get_retriever(vectorstore)

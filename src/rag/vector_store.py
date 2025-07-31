@@ -21,32 +21,21 @@ def split_documents(
     return splitter.split_documents(documents)
 
 
-def build_vectorstore(
-    documents: List[Document],
-    persist_directory: str = "embeddings/",
-    model_name: str = "llama3"
-) -> Chroma:
-    """
-    Builds and persists a Chroma vector store using Ollama embeddings.
-    """
-    os.environ["CHROMA_TELEMETRY_ENABLED"] = "FALSE"
-    embedding_model = OllamaEmbeddings(model=model_name)
+def build_vectorstore(documents, persist_directory):
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    split_docs = splitter.split_documents(documents)
 
-    # Split documents
-    chunks = split_documents(documents)
-
-    # Create and persist vector store
-    vectorstore = Chroma.from_documents(
-        documents=chunks,
+    embedding_model = OllamaEmbeddings(model="mistral")  
+    Chroma.from_documents(
+        documents=split_docs,
         embedding=embedding_model,
         persist_directory=persist_directory
     )
-    return vectorstore
 
 
 def load_vectorstore(
     persist_directory: str = "embeddings/",
-    model_name: str = "llama3"
+    model_name: str = "mistral"
 ) -> Chroma:
     """
     Loads an existing Chroma vector store from disk.
