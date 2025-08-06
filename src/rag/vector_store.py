@@ -8,8 +8,8 @@ from langchain_ollama import OllamaEmbeddings
 
 def split_documents(
     documents: List[Document],
-    chunk_size: int = 1000,
-    chunk_overlap: int = 200
+    chunk_size: int = 1500,
+    chunk_overlap: int = 500
 ) -> List[Document]:
     """
     Splits the input documents into smaller chunks for embedding.
@@ -22,7 +22,7 @@ def split_documents(
 
 
 def build_vectorstore(documents, persist_directory):
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=500)
     split_docs = splitter.split_documents(documents)
 
     embedding_model = OllamaEmbeddings(model="mistral")  

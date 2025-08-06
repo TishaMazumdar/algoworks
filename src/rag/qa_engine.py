@@ -26,11 +26,10 @@ def create_qa_chain(
     return qa_chain
 
 
-def query_rag(
-    chain: RetrievalQA,
-    question: str
-) -> dict:
-    """
-    Queries the QA chain with a given question.
-    """
-    return chain.invoke({"query": question})
+def query_rag(chain: RetrievalQA, question: str) -> dict:
+    result = chain.invoke({"query": question})
+    print("\n--- Retrieved Chunks ---")
+    for doc in result['source_documents']:
+        print(doc.metadata.get("source", "Unknown source"))
+        print(doc.page_content[:300], "\n---")  # First 300 characters
+    return result
