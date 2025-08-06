@@ -1,7 +1,6 @@
 from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
 from langchain_core.vectorstores import VectorStoreRetriever
-from src.utils.prompts import get_default_prompt
 
 
 def create_qa_chain(
@@ -20,8 +19,7 @@ def create_qa_chain(
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,
-        return_source_documents=True,
-        #chain_type_kwargs={"prompt": get_default_prompt()}
+        return_source_documents=True
     )
     return qa_chain
 

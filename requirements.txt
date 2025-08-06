@@ -19,3 +19,6 @@ pypdf
 unstructured
 python-docx
 openpyxl
+
+# MCP
+mcp[cli]
