@@ -21,7 +21,7 @@ def create_qa_chain(
         llm=llm,
         retriever=retriever,
         return_source_documents=True,
-        chain_type_kwargs={"prompt": get_default_prompt()}
+        #chain_type_kwargs={"prompt": get_default_prompt()}
     )
     return qa_chain
 
