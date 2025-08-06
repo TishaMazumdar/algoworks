@@ -23,15 +23,6 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.include_router(auth_router)
 templates = Jinja2Templates(directory="templates")
 
-# 🧠 Check if a question is already cached
-def get_cached_answer(user_id: str, question: str):
-    question = question.strip().lower()
-    history = load_user_cache(user_id)
-    for entry in history:
-        if entry.question.strip().lower() == question:
-            return entry
-    return None
-
 def get_user_folder(user_id: str):
     upload_dir = os.path.join("user_uploads", user_id)
     os.makedirs(upload_dir, exist_ok=True)
@@ -55,7 +46,7 @@ def ask_ui(request: Request, question: str = Form(...)):
         return RedirectResponse("/login", status_code=302)
 
     user_id = user["name"]
-    cached = get_cached_answer(user_id, question)
+    cached = get_user_cached_entry(user_id, question)
 
     if cached:
         answer = cached.answer
