@@ -52,8 +52,16 @@ def ask_ui(request: Request, question: str = Form(...)):
         answer = cached.answer
         sources = cached.sources
     else:
-        # Fallback to global qa_chain if user hasn’t uploaded
-        qa_chain = getattr(request.app.state, "qa_chain", None) or globals().get("qa_chain")
+        qa_chain = getattr(request.app.state, "qa_chain", None)
+
+        # If no QA chain exists yet, try to rebuild from persisted vectorstore
+        if not qa_chain:
+            embed_dir = get_embedding_folder(user_id)
+            if os.path.exists(embed_dir) and os.listdir(embed_dir):
+                retriever = get_vectorstore_retriever(persist_directory=embed_dir)
+                qa_chain = create_qa_chain(retriever)
+                request.app.state.qa_chain = qa_chain
+
         result = query_rag(qa_chain, question)
         raw_answer = result["result"]
         answer = markdown.markdown(raw_answer)
