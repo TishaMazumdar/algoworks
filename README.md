@@ -140,7 +140,7 @@ Open your browser and navigate to:
 1. Navigate to the main page
 2. Register/Login with your credentials
 3. Use the upload interface to add documents
-4. Supported formats: PDF, DOCX, TXT, XLSX
+4. Supported formats: PDF, DOCX, TXT
 
 ### Asking Questions
 1. Type your question in the chat interface
@@ -303,10 +303,9 @@ python main.py
 * ✅ PDF (`.pdf`)
 * ✅ Word Document (`.docx`)
 * ✅ Text File (`.txt`)
-* ✅ Excel File (`.xlsx`)
 
 > ❌ `.doc` files are **not** supported.
-> ⚠️ `.csv` support coming soon!
+> ⚠️ `.csv` and `.xlsx` support coming soon!
 
 ---
 
