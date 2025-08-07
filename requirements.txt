@@ -1,24 +1,39 @@
-# FastAPI backend
+# Web Framework
 fastapi
-uvicorn
+uvicorn[standard]
+jinja2
+python-multipart
+starlette
+
+# Environment and Configuration
 python-dotenv
 
-# Langchain core + integrations
+# LangChain Core
 langchain
-langchain-community
 langchain-core
+langchain-community
+langchain-chroma
 langchain-ollama
 
-# Vector store and LLM
+# Vector Database
 chromadb
-ollama
 
-# File loading and utilities
-tqdm
+# Document Processing
 pypdf
 unstructured
 python-docx
 openpyxl
 
-# MCP
-mcp[cli]
+# HTTP Requests
+requests
+httpx
+
+# Data Validation
+pydantic
+
+# Markdown Processing
+markdown
+
+# Utilities
+tqdm
+typing-extensions

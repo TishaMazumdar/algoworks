@@ -1,4 +1,4 @@
-from langchain_ollama import OllamaLLM
+from src.rag.mcp_llm import McpLLM
 from langchain.chains import RetrievalQA
 from langchain_core.vectorstores import VectorStoreRetriever
 
@@ -10,9 +10,9 @@ def create_qa_chain(
     """
     Creates a RetrievalQA chain with a custom prompt and retriever.
     """
-    llm = OllamaLLM(
-        model="mistral",
-        system_message="You are a helpful support assistant. Only use the provided context. Do not hallucinate."
+    llm = McpLLM(
+        model=model_name,
+        mcp_url="http://localhost:11434/api/chat"
     )
 
 
