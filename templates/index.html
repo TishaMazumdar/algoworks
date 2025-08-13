@@ -237,7 +237,20 @@
             <h2>Your Files</h2>
             <ul style="list-style: none; padding-left: 0;">
                 {% for file in files %}
-                    <li style="color: white;">📄 {{ file }}</li>
+                    <li style="color: white; display: flex; align-items: center; padding: 8px 12px; margin-bottom: 2px; background-color: #2a2a2a; border-radius: 6px;">
+                        <span style="flex: 1; word-break: break-word;">📄 {{ file }}</span>
+                        <button class="delete-btn" onclick="deleteFile('{{ file }}')" 
+                                style="background: none; border: none; color: #ff6b6b; cursor: pointer; 
+                                    font-size: 16px; line-height: 0; padding: 0; border-radius: 4px; 
+                                    margin-left: 8px; transition: all 0.2s; width: 24px; height: 24px; 
+                                    display: flex; align-items: center; justify-content: center; 
+                                    flex-shrink: 0; margin-bottom: 8px;" 
+                                title="Delete file"
+                                onmouseover="this.style.backgroundColor='#ff6b6b'; this.style.color='white';"
+                                onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ff6b6b';">
+                            ✕
+                        </button>
+                    </li>
                 {% endfor %}
             </ul>
         {% endif %}
@@ -289,6 +302,85 @@
             const toast = document.querySelector('[style*="background-color: #003c2d"]');
             if (toast) toast.style.display = 'none';
         }, 3000);
+
+        // File deletion function
+        async function deleteFile(filename) {
+            if (!confirm(`Are you sure you want to delete "${filename}"? This will remove the file and all its embeddings.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/files/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Show success message
+                    showToast(`✅ Successfully deleted "${filename}"`, 'success');
+                    
+                    // Remove the file from the UI
+                    location.reload();
+                } else {
+                    // Show error message
+                    showToast(`❌ Error deleting "${filename}": ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showToast(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            // Remove existing toast if any
+            const existingToast = document.querySelector('.custom-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            toast.textContent = message;
+            
+            const colors = {
+                success: { bg: '#003c2d', border: '#00c26e' },
+                error: { bg: '#3c0000', border: '#ff6b6b' },
+                info: { bg: '#1e2936', border: '#4a9eff' }
+            };
+            
+            const color = colors[type] || colors.info;
+            
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: ${color.bg};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                border-left: 4px solid ${color.border};
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 1000;
+                max-width: 400px;
+                word-wrap: break-word;
+                font-family: 'Inter', sans-serif;
+                font-size: 14px;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 4000);
+        }
     </script>
 </body>
 </html>
