@@ -218,12 +218,20 @@ def delete_file_by_id(request: Request, file_id: str):
         return JSONResponse({"error": "Not authenticated"}, status_code=401)
     
     user_id = user["name"]
+    upload_dir = get_user_folder(user_id)
     embed_dir = get_embedding_folder(user_id)
     
     try:
-        success = delete_documents_by_file_id(embed_dir, file_id)
+        success, filename = delete_documents_by_file_id(embed_dir, file_id)
         
         if success:
+            # Delete physical file if filename was found
+            if filename:
+                file_path = os.path.join(upload_dir, filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"Deleted physical file: {file_path}")
+            
             # Rebuild the QA chain
             retriever = get_filtered_retriever(
                 persist_directory=embed_dir,
