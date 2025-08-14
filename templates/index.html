@@ -230,7 +230,7 @@
                 Choose File
             </label>
             <input id="fileUpload" type="file" name="file" accept=".pdf,.txt,.docx" required
-                style="display: none;" onchange="document.getElementById('uploadForm').submit();">
+                style="display: none;" onchange="handleFileUpload(this);">
         </form>
 
         {% if file_metadata %}
@@ -239,7 +239,7 @@
                 {% for file in file_metadata %}
                     <li style="color: white; display: flex; align-items: center; padding: 8px 12px; margin-bottom: 2px; background-color: #2a2a2a; border-radius: 6px;">
                         <span style="flex: 1; word-break: break-word;">
-                            📄 {{ file.filename }}
+                            📄{{ file.filename }}
                             {% if file.chunk_count %}
                                 <small style="color: #888; margin-left: 8px;">({{ file.chunk_count }} chunks)</small>
                             {% endif %}
@@ -288,7 +288,24 @@
                 <strong>Sources:</strong>
                 <ul>
                 {% for source in sources %}
-                    <li>{{ source.replace('\\', '/').split('/')[-1] }}</li>
+                    {% if source.startswith('🌐') %}
+                        <li style="color: #4a9eff;">
+                            <a href="{{ source[2:] }}" target="_blank" rel="noopener noreferrer" 
+                               style="color: #4a9eff; text-decoration: none;">
+                                🌐 {{ source[2:] }}
+                            </a>
+                            <small style="color: #888; display: block; font-size: 12px; margin-top: 2px;">
+                                External web source
+                            </small>
+                        </li>
+                    {% else %}
+                        <li style="color: #00c26e;">
+                            📄 {{ source.replace('\\', '/').split('/')[-1] }}
+                            <small style="color: #888; display: block; font-size: 12px; margin-top: 2px;">
+                                From your documents
+                            </small>
+                        </li>
+                    {% endif %}
                 {% endfor %}
                 </ul>
             </div>
@@ -303,10 +320,51 @@
             spinner.style.display = 'block';
         });
 
+        // Handle server-side toast messages with enhanced styling
         setTimeout(() => {
-            const toast = document.querySelector('[style*="background-color: #003c2d"]');
-            if (toast) toast.style.display = 'none';
-        }, 3000);
+            const serverToast = document.querySelector('[style*="background-color: #003c2d"]');
+            if (serverToast) {
+                // Convert server toast to custom toast for better styling
+                const message = serverToast.textContent;
+                serverToast.style.display = 'none';
+                
+                // Determine toast type based on message content
+                let type = 'info';
+                if (message.includes('✅') || message.includes('success')) {
+                    type = 'success';
+                } else if (message.includes('❌') || message.includes('Error')) {
+                    type = 'error';
+                }
+                
+                showToast(message, type);
+            }
+        }, 100);
+
+        // Show welcome toast for new users
+        document.addEventListener('DOMContentLoaded', function() {
+            const userName = '{{ user_name }}';
+            const isNewSession = sessionStorage.getItem('welcomed_' + userName) !== 'true';
+            
+            if (userName && isNewSession) {
+                showToast(`🎉 Welcome back, ${userName}! Ready to help you find answers.`, 'success');
+                sessionStorage.setItem('welcomed_' + userName, 'true');
+            }
+        });
+
+        // Handle file upload with immediate feedback
+        function handleFileUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileName = file.name;
+                const fileSize = (file.size / 1024 / 1024).toFixed(2); // Size in MB
+                
+                // Show uploading toast (longer duration for upload process)
+                showToast(`📤 Uploading "${fileName}" (${fileSize} MB)...`, 'info', 8000);
+                
+                // Submit the form
+                document.getElementById('uploadForm').submit();
+            }
+        }
 
         // File deletion function using file ID (more reliable)
         async function deleteFileById(fileId, filename) {
@@ -371,7 +429,7 @@
         }
 
         // Toast notification function
-        function showToast(message, type = 'info') {
+        function showToast(message, type = 'info', duration = 4000) {
             // Remove existing toast if any
             const existingToast = document.querySelector('.custom-toast');
             if (existingToast) {
@@ -385,8 +443,8 @@
             
             const colors = {
                 success: { bg: '#003c2d', border: '#00c26e' },
-                error: { bg: '#3c0000', border: '#ff6b6b' },
-                info: { bg: '#1e2936', border: '#4a9eff' }
+                error: { bg: '#003c2d', border: '#00c26e' },
+                info: { bg: '#003c2d', border: '#00c26e' }
             };
             
             const color = colors[type] || colors.info;
@@ -396,26 +454,48 @@
                 top: 20px;
                 right: 20px;
                 background-color: ${color.bg};
+                background-image: none;
+                background-blend-mode: normal;
                 color: white;
                 padding: 12px 20px;
                 border-radius: 8px;
                 border-left: 4px solid ${color.border};
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                border-top: none;
+                border-right: none;
+                border-bottom: none;
                 z-index: 1000;
                 max-width: 400px;
                 word-wrap: break-word;
                 font-family: 'Inter', sans-serif;
                 font-size: 14px;
+                opacity: 0;
+                transform: translateX(20px);
+                transition: all 0.3s ease;
+                box-shadow: none;
+                text-shadow: none;
+                backdrop-filter: none;
             `;
             
             document.body.appendChild(toast);
             
-            // Auto remove after 4 seconds
+            // Animate in
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after specified duration
             setTimeout(() => {
                 if (toast.parentNode) {
-                    toast.remove();
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.remove();
+                        }
+                    }, 300);
                 }
-            }, 4000);
+            }, duration);
         }
     </script>
 </body>

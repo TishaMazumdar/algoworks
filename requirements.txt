@@ -18,6 +18,9 @@ langchain-ollama
 # Vector Database
 chromadb
 
+# Web Search
+requests
+
 # Document Processing
 pypdf
 unstructured

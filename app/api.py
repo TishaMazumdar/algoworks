@@ -14,7 +14,8 @@ from src.rag.vector_store import (
     add_documents_to_vectorstore, load_vectorstore
 )
 from src.models.history import ChatEntry, load_user_cache, save_user_cache, clear_user_cache, get_user_cached_entry
-from src.loaders.file_loader import load_all_documents, load_single_document, get_file_metadata
+from src.loaders.file_loader import load_all_documents, load_single_document
+from src.web_search.search_engine import search_web, format_web_search_response, has_relevant_rag_results
 from app.auth_routes import router as auth_router
 from app.mcp_client import ask_mcp  # used as fallback if RAG is not ready
 
@@ -61,20 +62,56 @@ def ask_ui(request: Request, question: str = Form(...)):
         if use_rag:
             try:
                 result = query_rag(qa_chain, question)
-                raw_answer = result["result"]
-                answer = markdown.markdown(raw_answer)
-                sources = list({
-                    doc.metadata.get("source", "unknown")
-                    for doc in result["source_documents"]
-                })
+                
+                # Check if RAG results are relevant
+                if has_relevant_rag_results(result):
+                    # Use RAG results
+                    raw_answer = result["result"]
+                    answer = markdown.markdown(raw_answer)
+                    sources = list({
+                        doc.metadata.get("source", "unknown")
+                        for doc in result["source_documents"]
+                    })
+                    print(f"[RAG SUCCESS] Used document results for: {question}")
+                else:
+                    # RAG results not relevant, try web search
+                    print(f"[RAG INSUFFICIENT] Falling back to web search for: {question}")
+                    web_results = search_web(question)
+                    formatted_response = format_web_search_response(web_results, question)
+                    
+                    answer = markdown.markdown(formatted_response["answer"])
+                    sources = formatted_response["sources"]
+                    
             except Exception as e:
                 print(f"[RAG ERROR] {e}")
-                use_rag = False  # fallback to MCP only
+                # If RAG fails completely, try web search
+                print(f"[RAG FAILED] Falling back to web search for: {question}")
+                try:
+                    web_results = search_web(question)
+                    formatted_response = format_web_search_response(web_results, question)
+                    
+                    answer = markdown.markdown(formatted_response["answer"])
+                    sources = formatted_response["sources"]
+                except Exception as web_error:
+                    print(f"[WEB SEARCH ERROR] {web_error}")
+                    answer = "❌ Both document search and web search failed. Please try again."
+                    sources = []
 
-        if not use_rag:
-            mcp_result = ask_mcp(question)
-            answer = markdown.markdown(mcp_result.get("answer", "No answer."))
-            sources = mcp_result.get("sources", [])
+        else:
+            # No RAG available, try web search first, then MCP fallback
+            try:
+                print(f"[NO RAG] Using web search for: {question}")
+                web_results = search_web(question)
+                formatted_response = format_web_search_response(web_results, question)
+                
+                answer = markdown.markdown(formatted_response["answer"])
+                sources = formatted_response["sources"]
+            except Exception as web_error:
+                print(f"[WEB SEARCH ERROR] {web_error}")
+                # Final fallback to MCP
+                mcp_result = ask_mcp(question)
+                answer = markdown.markdown(mcp_result.get("answer", "No answer available."))
+                sources = mcp_result.get("sources", [])
 
         # Save to user cache
         new_entry = ChatEntry(question=question, answer=answer, sources=sources)
