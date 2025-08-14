@@ -80,9 +80,10 @@ def add_documents_to_vectorstore(
 def delete_documents_by_file_id(
     persist_directory: str, 
     file_id: str
-) -> bool:
+) -> tuple[bool, str]:
     """
     Delete all embeddings for a specific file using its file_id.
+    Returns (success, filename) tuple.
     """
     try:
         vectorstore = load_vectorstore(persist_directory)
@@ -91,6 +92,11 @@ def delete_documents_by_file_id(
         results = vectorstore.get(where={"file_id": file_id})
         
         if results and results['ids']:
+            # Get filename from metadata before deleting
+            filename = None
+            if results['metadatas'] and len(results['metadatas']) > 0:
+                filename = results['metadatas'][0].get('filename')
+            
             # Delete documents by their IDs
             vectorstore.delete(ids=results['ids'])
             
@@ -98,14 +104,14 @@ def delete_documents_by_file_id(
             remove_file_from_metadata(persist_directory, file_id)
             
             print(f"Deleted {len(results['ids'])} chunks for file_id: {file_id}")
-            return True
+            return True, filename
         else:
             print(f"No documents found for file_id: {file_id}")
-            return False
+            return False, None
             
     except Exception as e:
         print(f"Error deleting documents for file_id {file_id}: {e}")
-        return False
+        return False, None
 
 def delete_documents_by_filename(
     persist_directory: str, 
@@ -208,14 +214,23 @@ def remove_file_from_metadata(persist_directory: str, file_id: str):
     metadata_file = os.path.join(persist_directory, "file_metadata.json")
     
     if os.path.exists(metadata_file):
-        with open(metadata_file, 'r') as f:
-            data = json.load(f)
-        
-        if file_id in data:
-            del data[file_id]
+        try:
+            with open(metadata_file, 'r') as f:
+                data = json.load(f)
             
-            with open(metadata_file, 'w') as f:
-                json.dump(data, f, indent=2)
+            if file_id in data:
+                filename = data[file_id].get('filename', 'Unknown')
+                del data[file_id]
+                
+                with open(metadata_file, 'w') as f:
+                    json.dump(data, f, indent=2)
+                    
+                print(f"✅ Removed {filename} from metadata file")
+            else:
+                print(f"⚠️ File ID {file_id} not found in metadata")
+                
+        except Exception as e:
+            print(f"❌ Error updating metadata file: {e}")
 
 def load_vectorstore(
     persist_directory: str = "embeddings/",
