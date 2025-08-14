@@ -188,7 +188,6 @@ Open your browser and navigate to:
 ### Example Queries
 ```
 "What are the main findings in the research paper?"
-"Summarize the financial data from the Excel file"
 "What does the document say about implementation costs?"
 
 # Web search fallback examples:
